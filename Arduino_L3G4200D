@@ -1,0 +1,208 @@
+// Vegard B
+// Gyroscope L3G4200D - Test.
+
+// Thanks to the following guides
+// [1]: http://www.elecfreaks.com/wiki/index.php?title=Triple_Axis_Gyro_-_L3G4200D
+// [2]: http://morf.lv/modules.php?name=tutorials&lasit=32
+// 
+
+// ***********************************************************************************************
+// Used with Arduino DUE, 4 wire SPI with CS pin 8 (3.3V) and interrupt from gyroscope on pin 22
+// 
+// Datasheet to L3G4200D: https://www1.elfa.se/data1/wwwroot/assets/datasheets/27911-gyroscope_eng_tds.pdf
+// 
+// ***********************************************************************************************
+
+
+#include "SPI.h"
+
+byte avlestVerdi;                                                   // Variabeles for x,y,z byte from gyro
+long x,y,z;                                                         // Variables for x,y,z direction
+float xDPS, yDPS, zDPS;                                             // Variable conversion to DPS (Degree per second)
+int intGyro = 22;                                                   // Interrupt on pin 22 (NOT IN USE)
+int temperatur;                                                     // Gyroscope on-chip temperature
+float gyroSens = 0.00875;                                           // Gyroscope sensitivity (250 DPS)
+int signedData;                                                     // Conversion from unsigned to signed 
+int gyroSS = 8;                                                     // Gyroscope Slave Select
+float xOff,yOff,zOff;                                               // DPS offset x,y,z
+float angleX,angleY,angleZ;                                         // Angle
+float pT;
+int thrMulti = 1.5;                                                 // Threshold multiplication factor
+
+
+
+void setup() {
+  
+  Serial.begin(9600);                                                // Serial transfere to computer/arduino terminal
+  Serial.println("Testprogram");
+  
+  SPI.setClockDivider(SPI_CLOCK_DIV8);                               // SPI clock 10.5MHz
+  SPI.setDataMode(SPI_MODE3);                                        // CPOL = 1, CPHA = 1
+  pinMode(gyroSS ,OUTPUT);                                           // INT2 from gyroscope, new data is ready
+  digitalWrite(gyroSS,HIGH);                                         // Setting CS High
+
+  delay(100);                                                        // Delay before init of gyro
+  gyroOppstart();                                                    // Gyroscope registersetting
+  
+  // Starter testrutine                          
+  Serial.print("Starter testrutine, finner offsett. Hold gyroskopet i ro");
+  Serial.println();
+  getOffsett();                                                      // Finding the gyro offset values
+
+  }
+
+int gyroOppstart() {                                                 // Setting gyro controlregisters
+
+  if(spiRead(0x0F) != 0XD3)                                          // Selfcheck (NOT USED)
+    return -1;
+  
+  // CTRL_REG1
+  spiWrite(0x20,0x0F);                                               // Turn on x, y og z axis measurement, turn off "power down"
+  
+  // CTRL_REG3
+  spiWrite(0x22,0x8);                                                // Enable INT2 (data ready) from gyroscope
+  
+  // CTRL_REG4
+  spiWrite(0x23,0x80);                                               // Setting sensitivity 250 dps and Block Data Update
+  
+  }
+
+void loop() {                                                        
+ 
+  findDPS();
+  
+  float cT = micros();                                                // Microseconds since Arduino board began running the current program
+  float dT =((cT - pT)/1000000);                                      // Current timing (cT) minus previous timing (pT) and convert microS to second 
+  pT = cT;                                                            // Setting previous timing equal current.
+  
+  angleX += xDPS*dT;                                                  // Finding angle x-axis
+  angleY += yDPS*dT;                                                  // Finding angle y-axis
+  angleZ += zDPS*dT;                                                  // Finding angle z-axis
+  
+  Serial.print("\t");
+  Serial.print("X-axis : ");
+  Serial.print(angleX);                                               // Print x-axis
+  Serial.print("\t");  
+  Serial.print("Y-axis : ");
+  Serial.print(angleY);                                               // Print y-axis
+  Serial.print("\t");
+  Serial.print("Z-axis : ");
+  Serial.print(angleZ);                                               // Print z-axis
+  Serial.print("\t");
+  Serial.println();
+
+   delay(15);                                                         // Delay before next call/update
+ 
+  }  
+
+void spiWrite(byte adresse,byte data) {                               // SPI write routine
+  
+  adresse &= 0x7F;                                                    // 0x7F = 0111 1111. Bit 1 is 0 and we are writing. 
+  SPI.begin();                                                        // Starting SPI
+  digitalWrite(gyroSS,LOW);                                           // Setting CS High
+   
+  SPI.transfer(adresse);                                              // First byte (of 16 bit)
+  SPI.transfer(data);                                                 // last byte  (of 16 bit)
+  
+  digitalWrite(gyroSS,HIGH);                                          // Setting CS lav
+  SPI.end();                                                          // Ending SPI
+  
+  }
+
+int spiRead(byte adresse)  {
+  
+  adresse |= 0x80;                                                    // 0x80 = 1000 000. Bit 1 is 1 and we are reading.
+  SPI.begin();                                                        // Starting SPI  
+  digitalWrite(gyroSS,LOW);                                           // Setting CS Høy
+  
+  SPI.transfer(adresse);                                              // Adresse to be read
+  avlestVerdi = SPI.transfer(0x00);                                   // Reading register value, sending 0x00 (must send value) 
+  
+  digitalWrite(gyroSS,HIGH);                                          // Setting CS lav
+  SPI.end();                                                          // Ending SPI
+  
+  return avlestVerdi;                                                 // Returning value
+
+  }
+  
+void findDPS() {                                                      // Finding DPS and compare with threshold value
+  
+  getGyroData();                                                      // Reading angular values
+  
+  if (abs(xDPS-xOff) > abs(xOff)){                                    // Use offset as threshold
+     xDPS = (xDPS-xOff);
+     }
+  if (abs(yDPS-yOff) > abs(yOff)){                                    // Use offset as threshold
+     yDPS = (yDPS-yOff);
+     }
+  if (abs(zDPS-yOff) > abs(zOff)){                                    // Use offset as threshold
+     zDPS = (zDPS-zOff);
+    }
+  
+  }
+
+void getGyroData() {                                                  // Finding DPS
+    
+  // Avleser 16 bit x-akse
+  x = (spiRead(0x29) & 0xFF) << 8;                                    // OUT_X_H - First byte, setting adressbyte 0 and bitshift by 8
+  x |= (spiRead(0x28) & 0xFF);                                        // OUT_X_L - Last byte, setting adressbyte to 0, add to first byte
+  xDPS = (convToSigned(x)*gyroSens);                                  // Convert to DPS
+  
+  // Avleser 16 bit y-akse
+  y = (spiRead(0x2B) & 0xFF) << 8;                                    // OUT_Y_H - First byte, setting adressbyte 0 and bitshift by 8
+  y |= (spiRead(0x2A) & 0xFF);                                        // OUT_Y_L - Last byte, setting adressbyte to 0, add to first byte
+  yDPS = (convToSigned(y)*gyroSens);                                  // Convert to DPS
+    
+  // Avleser 16 bit z-akse
+  z = (spiRead(0x2D) & 0xFF) << 8;                                    // OUT_Z_H - First byte, setting adressbyte 0 and bitshift by 8
+  z |= (spiRead(0x2C) & 0xFF);                                        // OUT_Z_L - Last byte, setting adressbyte to 0, add to first byte
+  zDPS = (convToSigned(z)*gyroSens);                                  // Convert to DPS  
+  
+  }
+  
+ int convToSigned(int unsignedData) {                                 // Convert from unsigned to signed value
+   
+   int sjekkFortegn; 
+   
+   sjekkFortegn = unsignedData & 0x8000;                              // Checking MSB, negative sign if 1, else positive
+   
+   if (sjekkFortegn == 0x8000)
+   {
+     signedData = unsignedData - 65536;                               // Subtracting 2^16 to represent negative values
+   }  
+   else 
+   {
+     signedData = unsignedData;                                       // If less than 0x8000, positive sign 
+   }   
+   return signedData; 
+   
+   }
+ 
+ void getOffsett() {                                                  // Find DPS offset
+   
+   int testSampler = 500;                                             // Testsamples to average DPS offset value. 
+   
+   for (int n = 0; n < testSampler; n++) {
+     
+     getGyroData();                                                   // New gyroscope data
+     
+     xOff += (float)xDPS;
+     yOff += (float)yDPS;
+     zOff += (float)zDPS;
+     
+     delayMicroseconds(10);                                           // 100Hz refresh rate on gyroscope  
+     }
+     
+   xOff = xOff/testSampler;                                           // Find average DPS offset x
+   yOff = yOff/testSampler;                                           // Find average DPS offset y
+   zOff = zOff/testSampler;                                           // Find average DPS offset z
+  
+   }
+
+int getGyroTemp(){                                                    // Find on-chip temperature
+  
+  // Avleser 8 bit temperatur (elektronikk)
+  temperatur = (25 -(spiRead(0x26) & 0xFF)) + 25;                     // OUT_TEMP - Reading value (reference 25C). 
+  
+  }
+
