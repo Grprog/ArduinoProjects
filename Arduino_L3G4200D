@@ -38,7 +38,7 @@ void setup() {
   
   SPI.setClockDivider(SPI_CLOCK_DIV8);                               // SPI clock 10.5MHz
   SPI.setDataMode(SPI_MODE3);                                        // CPOL = 1, CPHA = 1
-  pinMode(gyroSS ,OUTPUT);                                           // INT2 from gyroscope, new data is ready
+  pinMode(gyroSS ,OUTPUT);                                           // CS gyroscope
   digitalWrite(gyroSS,HIGH);                                         // Setting CS High
 
   delay(100);                                                        // Delay before init of gyro
