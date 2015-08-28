@@ -13,7 +13,7 @@
 // 
 // ***********************************************************************************************
 
-
+// Arduino
 #include "SPI.h"
 
 byte avlestVerdi;                                                   // Variabeles for x,y,z byte from gyro
