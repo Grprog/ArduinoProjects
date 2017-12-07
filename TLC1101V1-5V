@@ -5,12 +5,17 @@
 // Reference List
 // [1]: http://www.yesyes.info/index.php/electronics/rf1100-232-rf-433mhz-transceiver-module/
 
-// PIN SETUP 
+// *** PIN INFORMATION *** 
 // VCC = 5VDC Supply 
 // GND = Ground
 // Rxd = Data that has been recieved. 
 // Txd = Data to be transmitted
 // Sleep = TBA
+
+// *** PIN CONNECTION ON ARDUINO ***
+// Serial wiring description (Rxd and Txd) for Arduino MEGA, DUE and Leonardo is found on
+// https://www.arduino.cc/reference/en/language/functions/communication/serial/
+
 
 void setup()   /****** SETUP: RUNS ONCE ******/
 {
