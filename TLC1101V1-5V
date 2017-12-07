@@ -18,13 +18,12 @@
 // Serial wiring description (Rxd and Txd) for Arduino MEGA, DUE and Leonardo is found on
 // https://www.arduino.cc/reference/en/language/functions/communication/serial/
 
-
-
 void setup()   /****** SETUP: RUNS ONCE ******/
 {
-
-
-
+ serial1.begin(9600); // Start serial communication on Serial1, pin 19 (Rxd) and pin 18 (Txd)
+ serial1.write(0x02); // Setting TLC1101C1 baud rate to 9600. See [1] for different baud rates. 
+ 
+ serial.write(0x6A); // Reading the TLC1101C1 config. 
 }
 
 void loop()   /****** LOOP: RUNS CONSTANTLY ******/
