@@ -20,7 +20,7 @@
 
 // List of possible TLC1101C1 default baud rates.
 int listBaudrates = {4800,9600,19200};
-String listBaudHex = {"0x01","0x02","0x03"};
+String listBaudHex = {"0x01","0x02","0x03"}; //Binær
 
 void setup()   /****** SETUP: RUNS ONCE ******/
 {
