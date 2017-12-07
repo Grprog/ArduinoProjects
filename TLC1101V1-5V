@@ -18,12 +18,27 @@
 // Serial wiring description (Rxd and Txd) for Arduino MEGA, DUE and Leonardo is found on
 // https://www.arduino.cc/reference/en/language/functions/communication/serial/
 
+// List of possible TLC1101C1 default baud rates.
+int listBaudrates = {4800,9600,19200};
+int listBaudHex = {0x01,0x02,0x03};
+
 void setup()   /****** SETUP: RUNS ONCE ******/
 {
- serial1.begin(9600); // Start serial communication on Serial1, pin 19 (Rxd) and pin 18 (Txd)
- serial1.write(0x02); // Setting TLC1101C1 baud rate to 9600. See [1] for different baud rates. 
+
+// Start serial communication on Serial1, pin 19 (Rxd) and pin 18 (Txd)
+
+// Finding the default baud rate
+for (int i=0, i <= sizeof(listBaudrates), i++) 
+ serial1.begin(listBaudrates[i]); 
+ 
+ // Setting TLC1101C1 baud rate to listBaudrates[i]. See [1] for different baud rates. 
+ serial1.write(0xA3);
+ serial1.write(0xA3);
+ serial1.write(listBaudHex[i]); 
  
  serial.write(0x6A); // Reading the TLC1101C1 config. 
+ 
+ // if return is true, break loop and save 
 }
 
 void loop()   /****** LOOP: RUNS CONSTANTLY ******/
