@@ -20,7 +20,7 @@
 
 // List of possible TLC1101C1 default baud rates.
 int listBaudrates = {4800,9600,19200};
-String listBaudHex = {"0x01","0x02","0x03"}; //Binær
+int listBaudBinary = {00000001,00000002,00000003}; 
 
 void setup()   /****** SETUP: RUNS ONCE ******/
 {
@@ -32,11 +32,11 @@ for (int i=0, i <= sizeof(listBaudrates), i++)
  serial1.begin(listBaudrates[i]); 
  
  // Setting TLC1101C1 baud rate to listBaudrates[i]. See [1] for different baud rates. 
- serial1.write(0xA3);
- serial1.write(0xA3);
- serial1.write(listBaudHex[i]); 
+ serial1.write(10100011);
+ serial1.write(10100011);
+ serial1.write(listBaudBinary[i]); 
  
- serial.write(0x6A); // Reading the TLC1101C1 config. 
+ serial.write(01101010); // Reading the TLC1101C1 config. 
  
  // if return is true, break loop and save 
 }
