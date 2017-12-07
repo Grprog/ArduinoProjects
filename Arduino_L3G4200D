@@ -45,7 +45,8 @@ void setup() {
   gyroOppstart();                                                    // Gyroscope registersetting
   
   // Starter testrutine                          
-  Serial.print("Starter testrutine, finner offsett. Hold gyroskopet i ro");
+  Serial.print("Starting test routine, finding offsett. Do not move the gyroscope");
+  delay(5000);
   Serial.println();
   getOffsett();                                                      // Finding the gyro offset values
 
