@@ -5,4 +5,23 @@
 // Reference List
 // [1]: http://www.yesyes.info/index.php/electronics/rf1100-232-rf-433mhz-transceiver-module/
 
+// PIN SETUP 
+// VCC = 5VDC Supply 
+// GND = Ground
+// Rxd = Data that has been recieved. 
+// Txd = Data to be transmitted
+// Sleep = TBA
+
+void setup()   /****** SETUP: RUNS ONCE ******/
+{
+
+
+}
+
+void loop()   /****** LOOP: RUNS CONSTANTLY ******/
+{
+ 
+   
+}
+
 
