@@ -144,17 +144,17 @@ void findDPS() {                                                      // Finding
 
 void getGyroData() {                                                  // Finding DPS
     
-  // Avleser 16 bit x-akse
+  // reading 16 bit x-axis
   x = (spiRead(0x29) & 0xFF) << 8;                                    // OUT_X_H - First byte, setting adressbyte 0 and bitshift by 8
   x |= (spiRead(0x28) & 0xFF);                                        // OUT_X_L - Last byte, setting adressbyte to 0, add to first byte
   xDPS = (convToSigned(x)*gyroSens);                                  // Convert to DPS
   
-  // Avleser 16 bit y-akse
+  // reading 16 bit y-axis
   y = (spiRead(0x2B) & 0xFF) << 8;                                    // OUT_Y_H - First byte, setting adressbyte 0 and bitshift by 8
   y |= (spiRead(0x2A) & 0xFF);                                        // OUT_Y_L - Last byte, setting adressbyte to 0, add to first byte
   yDPS = (convToSigned(y)*gyroSens);                                  // Convert to DPS
     
-  // Avleser 16 bit z-akse
+  // reading 16 bit z-axis
   z = (spiRead(0x2D) & 0xFF) << 8;                                    // OUT_Z_H - First byte, setting adressbyte 0 and bitshift by 8
   z |= (spiRead(0x2C) & 0xFF);                                        // OUT_Z_L - Last byte, setting adressbyte to 0, add to first byte
   zDPS = (convToSigned(z)*gyroSens);                                  // Convert to DPS  
@@ -202,7 +202,7 @@ void getGyroData() {                                                  // Finding
 
 int getGyroTemp(){                                                    // Find on-chip temperature
   
-  // Avleser 8 bit temperatur (elektronikk)
+  // reading 8 bit electronic temperature
   temperatur = (25 -(spiRead(0x26) & 0xFF)) + 25;                     // OUT_TEMP - Reading value (reference 25C). 
   
   }
