@@ -1,6 +1,7 @@
 
 // Vegard Brattland
 // TLC1101C1-5V RF 433MHz 
+// Serial communication between Arduino Due and Arduino UNO
 
 // Reference List
 // [1]: http://www.yesyes.info/index.php/electronics/rf1100-232-rf-433mhz-transceiver-module/
@@ -15,6 +16,8 @@
 // *** PIN CONNECTION ON ARDUINO ***
 // Serial wiring description (Rxd and Txd) for Arduino MEGA, DUE and Leonardo is found on
 // https://www.arduino.cc/reference/en/language/functions/communication/serial/
+
+
 
 
 void setup()   /****** SETUP: RUNS ONCE ******/
